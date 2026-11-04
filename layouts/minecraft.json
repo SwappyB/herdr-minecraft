@@ -1,0 +1,214 @@
+{
+  "id": "root",
+  "type": "row",
+  "theme": "minecraft",
+  "font": "JetBrains Mono",
+  "font_size": 14,
+  "ui_font": "Monocraft",
+  "titlebar": "none",
+  "traffic_lights": [
+    22,
+    22
+  ],
+  "background": {
+    "image": "mods/mc/img/dirt-bg.png",
+    "fit": "cover"
+  },
+  "terminal_padding": [
+    10,
+    8
+  ],
+  "padding": 8,
+  "gap": 8,
+  "preview": "layouts/minecraft.svg",
+  "children": [
+    {
+      "id": "sidebar",
+      "type": "column",
+      "size": {
+        "px": 272
+      },
+      "min": 44,
+      "max": 480,
+      "background": "chrome",
+      "border": {
+        "width": 2,
+        "color": "#000000"
+      },
+      "resizable": false,
+      "children": [
+        {
+          "id": "brand",
+          "type": "block",
+          "size": {
+            "px": 50
+          },
+          "window_drag": true,
+          "content": {
+            "mod": "mc",
+            "props": {
+              "role": "brand"
+            }
+          }
+        },
+        {
+          "id": "sidebar-lists",
+          "type": "column",
+          "children": [
+            {
+              "id": "spaces",
+              "type": "block",
+              "size": {
+                "weight": 1
+              },
+              "min": 90,
+              "content": {
+                "mod": "mc-worlds"
+              }
+            },
+            {
+              "id": "agents",
+              "type": "block",
+              "size": {
+                "weight": 1
+              },
+              "min": 90,
+              "content": {
+                "mod": "mc-mobs"
+              }
+            }
+          ]
+        },
+        {
+          "id": "sidebar-footer",
+          "type": "block",
+          "size": {
+            "px": 46
+          },
+          "content": {
+            "mod": "mc",
+            "props": {
+              "role": "footer"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "work",
+      "type": "column",
+      "resizable": false,
+      "gap": 8,
+      "floating": [
+        {
+          "id": "advancement",
+          "content": {
+            "mod": "mc",
+            "props": {
+              "role": "advancement"
+            }
+          },
+          "edge": "top",
+          "align": "end"
+        }
+      ],
+      "children": [
+        {
+          "id": "work-body",
+          "type": "row",
+          "gap": 8,
+          "children": [
+            {
+              "id": "main",
+              "type": "block",
+              "content": {
+                "tab": "active",
+                "pane": {
+                  "gap": 8,
+                  "radius": 0,
+                  "background": "background",
+                  "lone": true,
+                  "border": {
+                    "width": 2,
+                    "color": "#000000"
+                  },
+                  "focus": {
+                    "width": 2,
+                    "color": "#ffffff"
+                  },
+                  "header": {
+                    "content": {
+                      "mod": "mc",
+                      "props": {
+                        "role": "pane"
+                      }
+                    },
+                    "height": 30,
+                    "position": "top",
+                    "reveal": "always"
+                  }
+                }
+              }
+            },
+            {
+              "id": "panel",
+              "type": "column",
+              "hidden": true,
+              "size": {
+                "px": 368
+              },
+              "min": 280,
+              "max": 900,
+              "background": "chrome",
+              "border": {
+                "width": 2,
+                "color": "#000000"
+              },
+              "children": [
+                {
+                  "id": "panel-body",
+                  "type": "stack",
+                  "active": "files",
+                  "children": [
+                    {
+                      "id": "files",
+                      "type": "block",
+                      "content": {
+                        "mod": "files"
+                      }
+                    },
+                    {
+                      "id": "changes",
+                      "type": "block",
+                      "content": {
+                        "mod": "changes"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "hud",
+          "type": "block",
+          "size": {
+            "px": 128
+          },
+          "window_drag": true,
+          "content": {
+            "mod": "mc",
+            "props": {
+              "role": "scene"
+            }
+          },
+          "border": {
+            "width": 2,
+            "color": "#000000"
+          }
+        }
+      ]
+    }
+  ]
+}

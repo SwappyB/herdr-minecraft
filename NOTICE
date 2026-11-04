@@ -1,0 +1,19 @@
+Herdr, Minecraft edition
+
+This repository mixes three licenses:
+
+- Everything not listed below (the mc mod, its pixel art and sounds, the
+  minecraft layout and theme): MIT, see LICENSE.
+
+- mods/mc-worlds and mods/mc-mobs are modified copies of Herdr's shipped
+  `spaces` and `agents` mods (Herdr 0.1.12, made with `mod.clone`), restyled
+  for this layout. Herdr is licensed under the Apache License 2.0; see
+  LICENSE-HERDR-APACHE-2.0.txt. Changes: Minecraft-style rows, slots and
+  item icons, renamed headers, readability colors.
+
+- mods/mc/fonts/Monocraft*.ttf: Monocraft by Idrees Hassan, SIL Open Font
+  License 1.1, see mods/mc/fonts/LICENSE-Monocraft.txt.
+
+All pixel art and sounds were drawn or synthesized for this project
+(mods/mc/art/generate.py, ffmpeg). No Mojang or Minecraft assets are included.
+Not affiliated with or endorsed by Mojang or Microsoft.
