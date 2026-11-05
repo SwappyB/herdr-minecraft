@@ -74,6 +74,19 @@ cover). Title bar hidden; macOS traffic lights at `[22, 22]`.
 
 ## How it behaves
 
+- **Claude usage** (when `~/.cache/herdr-mc/claude-usage.json` exists, written
+  by `mods/mc/claude-usage.sh` running as Claude Code's status line):
+  - Hearts = 5-hour limit left, drumsticks = weekly limit left, one half icon
+    per 5%. A window whose `resets_at` has passed counts as full. At 4 halves
+    or fewer the row shakes (`loop("top")`). Hover: percent left, reset time,
+    and how long ago Claude Code last reported. Read every 30 s.
+  - XP bar: if the focused pane runs Claude Code, its
+    `~/.cache/herdr-mc/sessions/<terminal>.json` (keyed by `HC_TERMINAL_ID`):
+    width = `context_window.used_percentage`, green `#80ff20`, gold `#ffcc33`
+    from 70%, red `#ff5555` pulsing from 90%; level = floor of
+    `cost.total_cost_usd`, drawn in the bar's color. Read every 10 s and on
+    focus change. Hover: context %, tokens of window size, model, session cost.
+  - Without these files the agent-based behavior below applies.
 - **Agent status:**
   - working: pickaxe on the slot, row and pane header; one drumstick eaten
     per working agent.
@@ -137,8 +150,9 @@ cover). Title bar hidden; macOS traffic lights at `[22, 22]`.
   `openOverlay` (menu, new-menu), `playSound`, `nextCommand`, and `run` with
   `tab.*`, `pane.*`, `layout.show/hide/select/resize`, `app.palette`,
   `app.settings`, `mod.open`.
-- Programs: none. No network access. It reads nothing outside
-  `~/.config/herdr-app`.
+- Programs: none run by the mod. No network access. It reads
+  `~/.cache/herdr-mc/` (written by `claude-usage.sh`, an optional status-line
+  wrapper that uses `jq`) and nothing else outside `~/.config/herdr-app`.
 
 ## Watch out
 
@@ -158,6 +172,10 @@ cover). Title bar hidden; macOS traffic lights at `[22, 22]`.
 - Small text gets no drop shadow (it blurs). Monocraft in terminals was hard
   to read, which is why terminals use JetBrains Mono.
 - Day/night follows `settings().dark`, not the clock.
+- Plan usage has no documented API; the status line JSON (`rate_limits`,
+  `context_window`, `cost`) is the only source, so numbers are only as fresh as
+  the last Claude Code activity. Sessions started before the wrapper was set
+  keep the old status line until restarted.
 - Sidebar mods use theme colors (no hardcoded grays), so one pair of theme
   files restyles both modes. Programs in terminals still choose their own colors.
 - The alert sounds in `settings.json` are the person's setting; the layout

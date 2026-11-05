@@ -4,21 +4,54 @@
 //   bottom      the held item's name (the shown tab), hearts and hunger, the
 //               XP bar and level, and the hotbar: one slot per tab
 //   top right   Files / Changes (the side panel) and the command palette
-// Hearts: two are lost per agent that needs you. Hunger: one drumstick is
-// eaten per agent working. Level: agents finished (mc.level, set by the
-// advancement toast); the bar fills as agents go idle.
+// Hearts and hunger are your Claude plan usage when it's known: hearts the
+// 5-hour limit left, drumsticks the weekly limit left (claude-usage.sh, run as
+// Claude Code's status line, saves them to ~/.cache/herdr-mc/claude-usage.json;
+// read every 30 s; a window whose reset time has passed counts as full). Low
+// ones shake, as in the game; hover for the numbers. Without that file: two
+// hearts lost per agent that needs you, one drumstick per agent working.
+// Agents that need you make the hearts flash either way. Level: agents
+// finished (mc.level, set by the advancement toast); the bar fills as agents go idle.
+// XP bar: when the focused pane runs Claude Code, the bar is its context
+// window (green, gold from 70%, red and pulsing from 90%) and the level its
+// cost in whole dollars (claude-usage.sh saves sessions/<terminal>.json;
+// the focused one is read every 10 s and on focus change). Otherwise: level =
+// agents finished, bar = share of agents idle.
 // Hotbar: click selects, double-click renames, right-click is the tab menu,
 // drag reorders, the scroll wheel cycles (as in the game), + adds a tab.
 
 import { div, svg } from "gpui-kit";
 import { h_flex, v_flex } from "gpui-base";
-import { spaces, panes, agents, run, openOverlay, shared, layout, keys, window } from "herdr";
+import { spaces, panes, agents, run, openOverlay, shared, layout, keys, window, readTextFile, home, focused } from "herdr";
 import { C, ico, mcText, flat, programIcon, button, find, click } from "./kit.js";
 
 const SLOT = 44;
+const USAGE = "/.cache/herdr-mc/claude-usage.json";
+const SESSIONS = "/.cache/herdr-mc/sessions/";
+
+const two = (n) => String(n).padStart(2, "0");
+const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+function when(epoch, withDay) {
+  if (!epoch) return "";
+  const d = new Date(epoch * 1000);
+  const h = d.getHours();
+  const time = `${h % 12 || 12}:${two(d.getMinutes())} ${h < 12 ? "AM" : "PM"}`;
+  return withDay ? `${DAYS[d.getDay()]} ${time}` : time;
+}
+function ago(epoch) {
+  const m = Math.max(0, Math.round((Date.now() / 1000 - epoch) / 60));
+  return m < 1 ? "just now" : m < 60 ? `${m} min ago` : `${Math.round(m / 60)} h ago`;
+}
 
 export default class Hud {
-  init() {
+  init(_props, cx) {
+    this.claude = null;
+    this.usageText = null;
+    if (cx) {
+      this.readUsage(cx);
+      cx.timer.every(30000, (cx) => this.readUsage(cx));
+      cx.timer.every(10000, (cx) => this.readSession(cx));
+    }
     this.pressed = null;
     this.panels = JSON.parse(localStorage.getItem("panels") ?? "{}");
     this.held = null;
@@ -149,6 +182,60 @@ export default class Hud {
       .child(plus);
   }
 
+  readUsage(cx) {
+    cx.spawn(async (cx) => {
+      let text = null;
+      try {
+        text = await readTextFile(home() + USAGE);
+      } catch {}
+      // Redraw only when the file changed, or a window's reset time has passed.
+      const key = `${text}|${this.resetsPassed()}`;
+      if (key === this.usageKey) return;
+      this.usageKey = key;
+      try {
+        this.claude = text ? JSON.parse(text) : null;
+      } catch {
+        this.claude = null;
+      }
+      this.usageKey = `${text}|${this.resetsPassed()}`;
+      cx.notify();
+    });
+  }
+
+  // The focused pane's Claude session, if it runs one here.
+  readSession(cx, terminal = this.sessionTerm) {
+    if (!terminal || terminal.includes("/")) return;
+    cx.spawn(async (cx) => {
+      let text = null;
+      try {
+        text = await readTextFile(home() + SESSIONS + terminal.replace(/[^A-Za-z0-9_-]/g, "_") + ".json");
+      } catch {}
+      if (terminal !== this.sessionTerm || text === this.sessionText) return;
+      this.sessionText = text;
+      try {
+        this.session = text ? JSON.parse(text) : null;
+      } catch {
+        this.session = null;
+      }
+      cx.notify();
+    });
+  }
+
+  resetsPassed() {
+    const r = this.claude?.rate_limits;
+    const now = Date.now() / 1000;
+    return ["five_hour", "seven_day"].filter((k) => r?.[k]?.resets_at && r[k].resets_at < now).join(",");
+  }
+
+  /** Percent left of the 5-hour and weekly windows, or null where unknown. */
+  usage() {
+    const r = this.claude?.rate_limits;
+    if (!r) return null;
+    const now = Date.now() / 1000;
+    const left = (w) => (!w ? null : w.resets_at && w.resets_at < now ? 100 : Math.max(0, Math.min(100, 100 - (w.used_percentage ?? 0))));
+    return { five: left(r.five_hour), week: left(r.seven_day), fiveAt: r.five_hour?.resets_at, weekAt: r.seven_day?.resets_at, at: this.claude.at };
+  }
+
   icons(full, half, empty, filled, n = 10, flip = false) {
     const list = Array.from({ length: n }, (_, i) => {
       const v = filled - i * 2;
@@ -164,7 +251,42 @@ export default class Hud {
     const working = list.filter((a) => a.status === "working").length;
     const calm = list.filter((a) => a.status === "idle" || a.status === "done").length;
     const level = Number(shared("mc.level") ?? 0);
-    const xp = list.length ? calm / list.length : 0;
+
+    // XP: the focused Claude session's context window, if there is one.
+    const f = focused();
+    const fp = panes().find((p) => p.pane === f?.pane);
+    const claudeHere = Boolean(f?.terminal && (fp?.program?.key === "claude" || /claude/i.test(fp?.app ?? "")));
+    if ((claudeHere ? f.terminal : null) !== this.sessionTerm) {
+      this.sessionTerm = claudeHere ? f.terminal : null;
+      this.session = null;
+      this.sessionText = null;
+      if (this.sessionTerm) this.readSession(cx);
+    }
+    const sess = claudeHere && this.session?.context != null ? this.session : null;
+    const ctx = sess ? Math.max(0, Math.min(100, sess.context)) : null;
+    const xp = sess ? ctx / 100 : list.length ? calm / list.length : 0;
+    const shownLevel = sess ? Math.floor(sess.cost ?? 0) : level;
+    const barColor = ctx == null || ctx < 70 ? C.green : ctx < 90 ? "#ffcc33" : "#ff5555";
+    const k = (n) => (n >= 1000000 ? `${(n / 1000000).toFixed(n % 1000000 ? 1 : 0)}M` : `${Math.round(n / 1000)}k`);
+    const xpTip = sess
+      ? `Context ${Math.round(ctx)}%${sess.tokens && sess.size ? ` · ${k(sess.tokens)} of ${k(sess.size)} tokens` : ""}${sess.model ? ` · ${sess.model}` : ""}${sess.cost != null ? ` · session $${sess.cost.toFixed(2)}` : ""}`
+      : `Level ${level}: agents finished · bar: share of agents idle`;
+
+    // Hearts and hunger: Claude plan usage left when known, else the agents.
+    const u = this.usage();
+    const halves = (pct) => Math.round(pct / 5);
+    // The numbers arrive with Claude Code's status line, so they're as fresh as its last activity.
+    const stamp = u ? ` · as of your last Claude Code activity, ${ago(u.at)}` : "";
+    const hearts = u?.five != null ? halves(u.five) : Math.max(0, 20 - blocked * 4);
+    const food = u?.week != null ? halves(u.week) : Math.max(0, 20 - working * 2);
+    const heartTip =
+      u?.five != null
+        ? `Claude 5-hour limit: ${Math.round(u.five)}% left${u.fiveAt ? ` · resets ${when(u.fiveAt)}` : ""}${stamp}`
+        : "Health: 2 hearts lost per agent that needs you";
+    const foodTip =
+      u?.week != null
+        ? `Claude weekly limit: ${Math.round(u.week)}% left${u.weekAt ? ` · resets ${when(u.weekAt, true)}` : ""}${stamp}`
+        : "Hunger: 1 drumstick eaten per working agent";
 
     // The held item's name shows, then fades, as in the game.
     const active = space?.tabs?.find((c) => c.active);
@@ -226,18 +348,30 @@ export default class Hud {
           .h(18)
           .justify_between()
           .child(
-            this.icons("heart", "heart-half", "heart-empty", Math.max(0, 20 - blocked * 4))
+            this.icons("heart", "heart-half", "heart-empty", hearts)
+              .id("hearts")
+              .relative()
+              .tooltip(heartTip)
+              .when(hearts <= 4, (el) => el.loop("top", { from: -1, to: 1.5, period: 160 }))
               .when(blocked > 0, (el) => el.loop("opacity", { from: 0.45, to: 1, period: 600 })),
           )
-          .child(this.icons("drumstick", "drumstick-empty", "drumstick-empty", Math.max(0, 20 - working * 2), 10, true)),
+          .child(
+            this.icons("drumstick", "drumstick-empty", "drumstick-empty", food, 10, true)
+              .id("hunger")
+              .relative()
+              .tooltip(foodTip)
+              .when(food <= 4, (el) => el.loop("top", { from: -1, to: 1.5, period: 220 })),
+          ),
       )
       .child(
         div()
+          .id("xp")
           .relative()
           .w(404)
           .h(14)
           .flex()
           .items_center()
+          .tooltip(xpTip)
           .child(
             div()
               .w_full()
@@ -245,7 +379,14 @@ export default class Hud {
               .bg("#1d2b10")
               .border(1)
               .border_color(C.black)
-              .child(div().h_full().w(Math.round(400 * xp)).bg(C.green).transition("width", { duration: 400 })),
+              .child(
+                div()
+                  .h_full()
+                  .w(Math.round(400 * xp))
+                  .bg(barColor)
+                  .transition("width", { duration: 400 })
+                  .when(ctx != null && ctx >= 90, (el) => el.loop("opacity", { from: 0.5, to: 1, period: 700 })),
+              ),
           )
           .child(
             h_flex()
@@ -256,7 +397,7 @@ export default class Hud {
               .justify_center()
               .text_size(13)
               .font_weight(700)
-              .child(mcText(String(level), C.green, 1.5)),
+              .child(mcText(String(shownLevel), barColor, 1.5)),
           ),
       )
       .child(div().h(2))
@@ -281,6 +422,7 @@ export default class Hud {
           .child(f3(`World: ${space?.name ?? "—"} · ${place ?? "Overworld"}`))
           .child(f3(`Biome: ${biome}`))
           .child(f3(`Agents: ${list.length}  working ${working}  idle ${calm}`, C.light))
+
           .when(blocked > 0, (el) => el.child(f3(`! ${blocked} hostile: needs you`, C.red))),
       )
       .child(

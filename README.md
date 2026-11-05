@@ -24,6 +24,27 @@ Check first that you don't already have mods or a layout with these names.
 Or ask your coding agent: *"Add the Herdr layout at github.com/SwappyB/herdr-minecraft"*.
 It will follow `RECIPE.md`.
 
+### Optional: Claude usage in the HUD
+
+With a Claude Pro, Max or Ultra plan, the hearts can show how much of your
+**5-hour limit** is left and the drumsticks your **weekly limit**. The XP bar
+shows the **context window** of the Claude session in the focused pane, and
+the level its cost in dollars. Claude Code passes these numbers to status-line
+scripts, so a small wrapper saves them for the HUD (to `~/.cache/herdr-mc/`)
+and then runs your own status line unchanged.
+
+In `~/.claude/settings.json`, put the wrapper in front of your status line
+command (needs `jq` and Claude Code 2.1.251 or later):
+
+```json
+"statusLine": { "type": "command", "command": "~/.config/herdr-app/mods/mc/claude-usage.sh <your status line command>" }
+```
+
+With no command after it, the wrapper prints nothing, so you get no status
+line text, only the HUD. Restart running Claude Code sessions to pick it up.
+Without the wrapper, hearts and hunger count agents instead (2 hearts lost per
+agent that needs you, 1 drumstick per working agent).
+
 ### Optional: Minecraft alert sounds
 
 Herdr's agent sounds are a personal setting, so they aren't changed for you.
@@ -40,8 +61,11 @@ To use the level-up chime and creeper hiss everywhere, add to
   with item badges: pickaxe working, creeper needs you, diamond done, torch idle.
 - **Pane headers:** oak planks, light when focused.
 - **The world** (bottom of the window), with the HUD laid over it:
-  - hearts (2 lost per agent that needs you), hunger (1 per working agent),
-    XP level (+1 per agent finished), hotbar = tabs (click, drag, scroll, right-click);
+  - hearts and hunger: your Claude 5-hour and weekly limits left (see above),
+    else agents that need you / are working; they shake when low;
+  - XP bar: the focused Claude session's context window (green → gold → red),
+    level = its cost; else agents finished;
+  - hotbar = tabs (click, drag, scroll, right-click);
   - day / night from your system theme (dark mode = night);
   - weather every ~5 min: clear, rain, thunder (the cats run into their hut), snow;
   - a nether portal (click to travel), and a trip to the Nether or the End about once an hour;
