@@ -1,10 +1,13 @@
 {
   "id": "root",
   "type": "row",
-  "theme": "minecraft",
-  "font": "JetBrains Mono",
+  "theme": {
+    "light": "minecraft-light",
+    "dark": "minecraft"
+  },
+  "font": "Monaspace Neon",
   "font_size": 14,
-  "ui_font": "Monocraft",
+  "ui_font": "Monaspace Krypton",
   "titlebar": "none",
   "traffic_lights": [
     22,

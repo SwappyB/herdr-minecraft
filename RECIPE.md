@@ -1,6 +1,7 @@
 # Herdr, Minecraft edition
 
-Herdr dressed as Minecraft. A light-gray inventory panel on the left lists
+Herdr dressed as Minecraft. An inventory panel on the left (birch in light
+mode, deepslate in dark) lists
 spaces as *Worlds* and agents with item badges. Terminals sit in square,
 black-bordered panes under oak-plank headers. The whole window floats on a
 dark dirt background. Along the bottom is a living world: sky, ground, a hut,
@@ -15,29 +16,30 @@ of tabs.
 Root row, padding 8, gap 8, on `mods/mc/img/dirt-bg.png` (darkened dirt,
 cover). Title bar hidden; macOS traffic lights at `[22, 22]`.
 
-- **Sidebar** (272 px, min 44, `#c6c6c6`, 2 px `#000000` border), top to bottom:
+- **Sidebar** (272 px, min 44, theme `chrome`, 2 px `#000000` border), top to bottom:
   - *Brand* (50 px, window drag): dark oak plank strip with a grass-block icon
     and a white bold drop-shadowed "HERDR". Search and fold icons are on the
     same row. Under them is a yellow `#ffff55` splash line ("Craft your code!",
     …), picked at random per start, pulsing opacity 0.6↔1. On macOS the left
     padding is 78 so the traffic lights fit.
   - *Worlds* (spaces, weight 1): rows 36 px tall. Each row has a 26 px slot
-    (`#8b8b8b`, 2 px `#373737` border) holding a grass block, or stone for a
-    remote machine. The space's color is a 6 px square in the slot's corner.
-    The selected row is `#e6e6e6` with a 3 px `#2e2e2e` left edge.
+    (theme `surface`, 2 px theme `input` border) holding a grass block, or
+    stone for a remote machine. The space's color is a 6 px square in the
+    slot's corner. The selected row is theme `selected` (the terminal's own
+    color) with a 3 px `foreground` left edge. Headers in Monocraft.
   - *Agents* (weight 1): program icon in a 24 px slot. Status is shown as an
     item: pickaxe pulsing (working), creeper with "Needs you" on `#3a0d0d`
     (blocked), diamond (done), torch at 75% (idle).
   - *Footer* (46 px): two stone buttons, "Options…" and "Add server"
-    (`#727272` face, 2 px bevel `#a9a9a9`/`#3c3c3c`, 2 px black outline,
+    (`#77706a` face, 2 px bevel `#aca59c`/`#3e3a35`, 2 px black outline,
     hover `#7f89c4`).
-- **Panes:** gap 8, radius 0, background `#141414`, 2 px `#000000` border,
+- **Panes:** gap 8, radius 0, background theme `background`, 2 px `#000000` border,
   `#ffffff` when focused. Header 30 px: a strip of oak planks (light when
   focused, dark otherwise) under a 20%/50% black wash. On it: the program in a
   22 px dark slot, then a `#000000b0` strip holding the name (white, shadowed)
   and the folder (yellow when focused, `#e0e0e0` otherwise, no shadow).
   Hovering adds split right, split down, zoom and close buttons.
-- **Right panel:** the shipped Files / Changes mods in a `#c6c6c6` column with
+- **Right panel:** the shipped Files / Changes mods in a `chrome` column with
   a black border.
 - **Scene** (128 px, window drag, 2 px black border): one mod draws the world
   behind and the HUD in front.
@@ -59,10 +61,16 @@ cover). Title bar hidden; macOS traffic lights at `[22, 22]`.
     border. The active slot has a 3 px `#f0f0f0` frame. Each slot shows the
     tab's program icon, its pane count, and its status (pickaxe, diamond, TNT;
     a red slot when blocked). A "+" slot comes last.
-- **Fonts:** Monocraft (bundled in `mods/mc/fonts/`) for the interface,
-  JetBrains Mono 14 for terminals. Theme `themes/minecraft.json`: Minecraft
-  chat colors for ANSI, panels `#c6c6c6`, text `#2e2e2e`, secondary
-  `#505050`.
+- **Fonts:** ui_font Monaspace Krypton, terminals Monaspace Neon 14; Monocraft
+  (bundled in `mods/mc/fonts/`) set explicitly on Minecraft labels (drop-shadow
+  text, buttons, HUD, scene, section headers).
+- **Themes**, `"theme": {"light": "minecraft-light", "dark": "minecraft"}`:
+  - *birch & paper* (light): terminal `#f6f1e4` / `#2f2a22`, chrome `#e2d7bd`,
+    surface (slots) `#cbb990`, input `#7a6646`, selected `#f6f1e4`, dim `#665843`.
+  - *deepslate* (dark): terminal `#1a1917` / `#e8e2d6`, chrome `#2a2826`,
+    surface `#1c1a18`, input `#0e0d0c`, selected `#3a3631`, dim `#ada494`.
+  - Both keep Minecraft chat colors for ANSI, darkened on light to pass 4.5:1.
+  - Stone buttons are warm gray `#77706a` (bevel `#aca59c` / `#3e3a35`).
 
 ## How it behaves
 
@@ -150,6 +158,8 @@ cover). Title bar hidden; macOS traffic lights at `[22, 22]`.
 - Small text gets no drop shadow (it blurs). Monocraft in terminals was hard
   to read, which is why terminals use JetBrains Mono.
 - Day/night follows `settings().dark`, not the clock.
+- Sidebar mods use theme colors (no hardcoded grays), so one pair of theme
+  files restyles both modes. Programs in terminals still choose their own colors.
 - The alert sounds in `settings.json` are the person's setting; the layout
   doesn't change them (see README).
 - Mod clones carry `cloned_from`; Herdr updates don't touch them.

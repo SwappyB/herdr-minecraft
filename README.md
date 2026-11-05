@@ -13,7 +13,7 @@ Poplu and Lizzy.
 git clone https://github.com/SwappyB/herdr-minecraft
 cd herdr-minecraft
 cp layouts/minecraft.json layouts/minecraft.svg ~/.config/herdr-app/layouts/
-cp themes/minecraft.json ~/.config/herdr-app/themes/
+cp themes/minecraft.json themes/minecraft-light.json ~/.config/herdr-app/themes/
 cp -R mods/mc mods/mc-worlds mods/mc-mobs ~/.config/herdr-app/mods/
 herdr-app do layout.switch '{"name":"minecraft"}'
 ```
@@ -50,7 +50,13 @@ To use the level-up chime and creeper hiss everywhere, add to
     Hover for a name, click for a poof.
   - Poplu and Lizzy: hover for their name, click for a meow.
 - **"Advancement Made!"** popups when an agent finishes.
-- Fonts: Monocraft for the interface, JetBrains Mono in terminals.
+- **Light and dark**, following your system: *birch & paper* (warm birch
+  sidebar, paper-colored terminal) or *deepslate* (warm dark stone sidebar,
+  near-black terminal). The world scene is day or night to match.
+- **Fonts:** Monocraft (bundled) for Minecraft labels, Monaspace Krypton for
+  lists and panels, Monaspace Neon in terminals. Install Monaspace with
+  `brew install --cask font-monaspace` (or from github.com/githubnext/monaspace);
+  without it Herdr falls back to JetBrains Mono.
 
 Skip ahead without waiting:
 

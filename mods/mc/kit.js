@@ -7,6 +7,9 @@ import { layout, playSound } from "herdr";
 
 export const A = "mods/mc";
 
+/** The pixel font, for Minecraft-flavored labels; everything else uses the layout's ui_font. */
+export const MC = "Monocraft";
+
 export const C = {
   panel: "#c6c6c6",
   hi: "#ffffff",
@@ -23,9 +26,9 @@ export const C = {
   green: "#80ff20",
   red: "#ff5555",
   aqua: "#55ffff",
-  button: "#727272",
-  buttonHi: "#a9a9a9",
-  buttonLo: "#3c3c3c",
+  button: "#77706a",
+  buttonHi: "#aca59c",
+  buttonLo: "#3e3a35",
   hover: "#7f89c4",
   hud: "#000000a0",
 };
@@ -54,6 +57,7 @@ export function mcText(text, color = C.white, d = 1.5) {
   return div()
     .relative()
     .flex_none()
+    .font_family(MC)
     .child(div().absolute().top(d).left(d).whitespace_nowrap().text_color(shadowOf(color)).child(s))
     .child(div().relative().whitespace_nowrap().text_color(color).child(s));
 }

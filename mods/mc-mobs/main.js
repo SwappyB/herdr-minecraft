@@ -288,7 +288,7 @@ export default class Agents extends View {
 
     const row = (a, i, subs = []) => {
       const raw = icon(a.program, 16, "#ffffff");
-      const pic = raw && div().size(24).flex_none().flex().items_center().justify_center().bg("#8b8b8b").border_t(2).border_l(2).border_r(2).border_b(2).border_color("#373737").child(raw);
+      const pic = raw && div().size(24).flex_none().flex().items_center().justify_center().bg(t.surface).border(2).border_color(t.input).child(raw);
       const more = detail.get(a.address);
       // An agent on another machine (`vps/t7`) says which.
       const machine = a.address.includes("/") ? a.address.split("/")[0] : null;
@@ -337,7 +337,7 @@ export default class Agents extends View {
         .items_center()
         .gap(9)
         .border_l(3).border_color("#00000000")
-        .when(a.focused, (el) => el.bg("#e6e6e6").border_color("#2e2e2e"))
+        .when(a.focused, (el) => el.bg(t.selected).border_color(t.foreground))
         .cursor_pointer()
         .hover((s) => s.bg(t.hover))
         .on_hover((on, cx) => {
@@ -408,7 +408,7 @@ export default class Agents extends View {
       .min_h(0)
       .bg(t.chrome)
       .border_t(2)
-      .border_color("#555555")
+      .border_color(t.border)
       .text_size(13)
       .when(!collapsed, (el) =>
         el.child(
@@ -420,7 +420,7 @@ export default class Agents extends View {
             .flex_none()
             .items_center()
             .justify_between()
-            .child(div().text_size(12).text_color("#3f3f3f").child("Agents"))
+            .child(div().font_family("Monocraft").text_size(12).text_color(t.dim).child("Agents"))
             .child(
               div()
                 .id("ag-sort")

@@ -356,7 +356,7 @@ export default class Spaces extends View {
       .flex_none()
       .justify_center()
       .border_l(3).border_color("#00000000")
-      .when(on, (el) => el.bg("#e6e6e6").border_color("#2e2e2e"))
+      .when(on, (el) => el.bg(t.selected).border_color(t.foreground))
       .when(!on, (el) => el.hover((s) => s.bg(t.hover)))
       .when(this.pressed === i && this.over !== i, (el) => el.opacity(0.5))
       .when(this.pressed !== null && this.over === i && this.pressed !== i, (el) => el.child(
@@ -391,7 +391,7 @@ export default class Spaces extends View {
           .gap(9)
           .items_center()
           .when(Boolean(tree), el => el.pl(22).child(svg("mods/workspace-chrome/branch.svg").size(13).text_color(t.dim)))
-          .when(!tree, el => el.child(div().size(26).flex_none().relative().flex().items_center().justify_center().bg("#8b8b8b").border(2).border_color("#373737")
+          .when(!tree, el => el.child(div().size(26).flex_none().relative().flex().items_center().justify_center().bg(t.surface).border(2).border_color(t.input)
             .child(image(`mods/mc/icons/${w.machine ? "stone" : "grass"}.svg`).w(18).h(18))
             .child(div().absolute().bottom(-2).right(-2).size(6).bg(fill).border(1).border_color("#000000"))
             .when(w.status === "blocked", e => e.child(image("mods/mc/icons/creeper.svg").w(10).h(10).absolute().top(-2).right(-2)))
@@ -433,7 +433,7 @@ export default class Spaces extends View {
     if (changed) setShared("space.colors", kept);
     return v_flex().size_full().min_h(0).bg(t.chrome).text_size(13)
       .child(h_flex().h(31).pl(16).pr(10).items_center().justify_between().text_size(11.5).text_color(t.dim)
-        .when(!collapsed, el => el.child(div().text_size(12).text_color("#3f3f3f").child("Worlds")))
+        .when(!collapsed, el => el.child(div().font_family("Monocraft").text_size(12).text_color(t.dim).child("Worlds")))
         .child(div().id("space-new").size(26).flex_none().flex().items_center().justify_center().hover(s => s.bg(t.hover).text_color(t.foreground))
           .tooltip("Create new world")
           .on_click(() => run("space.new")).child(image("mods/mc/icons/plus.svg").w(18).h(18))))

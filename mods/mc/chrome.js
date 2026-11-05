@@ -2,7 +2,7 @@
 
 import { div, svg } from "gpui-kit";
 import { h_flex, v_flex } from "gpui-base";
-import { run, window, shared, setShared, updates, layout } from "herdr";
+import { run, window, shared, setShared, updates, layout, theme } from "herdr";
 import { C, ico, mcText, button, strip, find, narrow } from "./kit.js";
 
 const SPLASHES = [
@@ -83,9 +83,9 @@ export class Footer {
       .px(6)
       .gap(6)
       .items_center()
-      .bg(C.panel)
+      .bg(theme().chrome)
       .border_t(2)
-      .border_color(C.shadow)
+      .border_color(theme().border)
       .text_size(13)
       .child(button("options", collapsed ? "⚙" : ready ? "Options… ●" : "Options…", () => run("app.settings"), { h: 30, flex: true, tooltip: ready ? "Settings · an update is ready" : "Settings" }))
       .when(!collapsed, (el) => el.child(button("servers", "Add server", () => run("mod.open", { name: "machine-add" }), { h: 30, flex: true, tooltip: "Add a machine" })));

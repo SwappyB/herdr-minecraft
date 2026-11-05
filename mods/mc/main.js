@@ -11,6 +11,7 @@
 
 import { View, div } from "gpui-kit";
 import { props } from "herdr";
+import { MC } from "./kit.js";
 import { Brand, Footer } from "./chrome.js";
 import PaneSign from "./pane.js";
 import Hud from "./hud.js";
@@ -27,7 +28,7 @@ class Scene {
   }
 
   render(cx) {
-    return div().relative().size_full().child(this.world.render(cx)).child(this.hud.render(cx, this.world.describe()));
+    return div().relative().size_full().font_family(MC).child(this.world.render(cx)).child(this.hud.render(cx, this.world.describe()));
   }
 }
 
